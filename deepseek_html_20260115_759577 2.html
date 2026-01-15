@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustMe Inspection by zxc_obezjankyaa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --gradient-1: linear-gradient(135deg, #000000 0%, #333333 50%, #000000 100%);
+            --gradient-2: linear-gradient(135deg, #1a1a1a 0%, #444444 50%, #1a1a1a 100%);
+            --gradient-3: linear-gradient(135deg, #262626 0%, #555555 50%, #262626 100%);
+            --text-color: #ffffff;
+            --accent-color: #888888;
+            --success-color: #00ff88;
+            --error-color: #ff3333;
+            --warning-color: #ffaa00;
+            --admin-color: #ff3366;
+            --mod-color: #3366ff;
+            --check-color: #00ccff;
+        }
+
+        body {
+            background: var(--gradient-1);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(100,100,100,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(150,150,150,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .swipe-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: swipe 3s infinite;
+        }
+
+        @keyframes swipe {
+            0% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .user-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-role {
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .role-admin {
+            background: var(--admin-color);
+        }
+
+        .role-check {
+            background: var(--check-color);
+            color: #000;
+        }
+
+        .role-user {
+            background: var(--accent-color);
+        }
+
+        .logout-btn {
+            background: rgba(255,51,51,0.2);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,51,51,0.4);
+        }
+
+        .gradient-header {
+            background: var(--gradient-2);
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            100% {
+                left: 100%;
+            }
+        }
+
+        .logo {
+            font-size: 3.5em;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #aaa, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #fff, 0 0 20px #fff;
+            }
+            to {
+                text-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #fff;
+            }
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #bbb;
+            margin-bottom: 30px;
+        }
+
+        .gradient-nav {
+            background: var(--gradient-3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-menu li {
+            position: relative;
+        }
+
+        .nav-menu a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-menu a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-menu a:hover::before {
+            left: 100%;
+        }
+
+        .nav-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .content-section {
+            display: none;
+            background: var(--gradient-2);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #fff;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+        }
+
+        .auth-form {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #333, #555, #333);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            background: linear-gradient(45deg, #444, #666, #444);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00a86b, #00ff88, #00a86b);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #00ff88, #00a86b, #00ff88);
+        }
+
+        .btn-admin {
+            background: linear-gradient(45deg, #ff3366, #ff6699, #ff3366);
+        }
+
+        .btn-admin:hover {
+            background: linear-gradient(45deg, #ff6699, #ff3366, #ff6699);
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .error {
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        .warning {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .download-section {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff3333, #ff6b6b);
+            padding: 20px 40px;
+            font-size: 1.2em;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 51, 51, 0.4);
+        }
+
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .admin-panel {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .keys-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .key-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-list {
+            margin-top: 20px;
+        }
+
+        .user-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .role-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .role-select {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+        }
+
+        .status-active {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-inactive {
+            background: rgba(255, 51, 51, 0.2);
+            color: var(--error-color);
+        }
+
+        .devs-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .dev-card {
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .dev-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .dev-name {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .dev-role {
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="swipe-animation"></div>
+    
+    <div class="container">
+        <!-- Панель пользователя -->
+        <div class="user-panel" id="userPanel" style="display: none;">
+            <div class="user-info">
+                <span id="currentUsername">Гость</span>
+                <span id="currentUserRole" class="user-role role-user">Гость</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">Выйти</button>
+        </div>
+
+        <header class="gradient-header">
+            <h1 class="logo">RustMe Inspection</h1>
+            <p class="subtitle">by zxc_obezjankyaa</p>
+        </header>
+
+        <nav class="gradient-nav">
+            <ul class="nav-menu">
+                <li><a href="#" onclick="showSection('home')">Главная</a></li>
+                <li><a href="#" onclick="showSection('download')">Скачать</a></li>
+                <li><a href="#" onclick="showSection('login')" id="loginNav">Войти</a></li>
+                <li><a href="#" onclick="showSection('register')">Регистрация</a></li>
+                <li><a href="#" onclick="showSection('activate')">Активация</a></li>
+                <li><a href="#" onclick="showSection('admin')" id="adminNav" style="display: none;">Админ-панель</a></li>
+                <li><a href="#" onclick="showSection('developers')">Разработчики</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- Главная страница -->
+            <section id="home" class="content-section active">
+                <h2 class="section-title">Добро пожаловать</h2>
+                <div class="auth-form">
+                    <p>Добро пожаловать в RustMe Inspection - продвинутую систему проверки Rust для обеспечения максимальной безопасности и производительности.</p>
+                    
+                    <div style="margin: 30px 0; text-align: center;">
+                        <div style="font-size: 1.2em; color: #00ff88; margin-bottom: 15px;">⚠️ ВНИМАНИЕ ⚠️</div>
+                        <p style="color: #ff6b6b;">Для доступа к инструментам проверки необходимо:</p>
+                        <ol style="text-align: left; margin: 15px 0; padding-left: 20px;">
+                            <li>Зарегистрировать аккаунт</li>
+                            <li>Получить ключ активации от администратора</li>
+                            <li>Активировать ключ в личном кабинете</li>
+                        </ol>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="showSection('register')">
+                        Начать регистрацию
+                    </button>
+                </div>
+            </section>
+
+            <!-- Вход в систему -->
+            <section id="login" class="content-section">
+                <h2 class="section-title">Вход в систему</h2>
+                <div class="auth-form">
+                    <div id="loginMessage" class="message" style="display: none;"></div>
+                    
+                    <div class="form-group">
+                        <label for="loginUsernameInput">Имя пользователя:</label>
+                        <input type="text" id="loginUsernameInput" placeholder="Введите имя пользователя">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPasswordInput">Пароль:</label>
+                        <input type="password" id="loginPasswordInput" placeholder="Введите пароль">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="loginUser()">
+                        Войти
+                    </button>
+                    
+                    <p style="margin-top: 20px; text-align: center; color: #aaa;">
+                        Нет аккаунта? <a href="#" onclick="showSection('register')" style="color: #00ff88;">Зарегистрируйтесь</a>
+                    </p>
+                </div>
+            </section>
+
+            <!-- Регистрация -->
+            <section id="register" class="content-section">
+                <h2 class="section-title">Регистрация</h2>
+                <div class="auth-form">
+                    <div id="registerMessage" class="message" style="display: none;"></div>
+                    
+                    <div class="form-group">
+                        <label for="username">Имя пользователя:</label>
+                        <input type="text" id="username" placeholder="Введите имя пользователя">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Пароль:</label>
+                        <input type="password" id="password" placeholder="Введите пароль">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Подтвердите пароль:</label>
+                        <input type="password" id="confirmPassword" placeholder="Подтвердите пароль">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="registerUser()">
+                        Зарегистрироваться
+                    </button>
+                    
+                    <p style="margin-top: 20px; text-align: center; color: #aaa;">
+                        Уже есть аккаунт? <a href="#" onclick="showSection('login')" style="color: #00ff88;">Войдите</a>
+                    </p>
+                </div>
+            </section>
+
+            <!-- Активация -->
+            <section id="activate" class="content-section">
+                <h2 class="section-title">Активация ключа</h2>
+                <div class="auth-form">
+                    <div id="activateMessage" class="message" style="display: none;"></div>
+                    
+                    <div class="form-group">
+                        <label for="activationUsername">Имя пользователя:</label>
+                        <input type="text" id="activationUsername" placeholder="Введите имя пользователя">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activationPassword">Пароль:</label>
+                        <input type="password" id="activationPassword" placeholder="Введите пароль">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activationKey">Ключ активации:</label>
+                        <input type="text" id="activationKey" placeholder="Введите ключ активации">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="activateKey()">
+                        Активировать ключ
+                    </button>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <p style="color: #aaa; font-size: 0.9em;">
+                            Чтобы получить ключ активации, обратитесь к администратору: 
+                            <strong>RoftikDEV</strong> или <strong>ZovDEV</strong>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Админ-панель -->
+            <section id="admin" class="content-section">
+                <h2 class="section-title">Административная панель</h2>
+                <div class="auth-form">
+                    <div id="adminPanel" class="admin-panel" style="display: none;">
+                        <h3 style="text-align: center; margin-bottom: 20px;">Панель управления</h3>
+                        
+                        <div class="admin-controls">
+                            <div>
+                                <h4>Генератор ключей</h4>
+                                <div class="form-group">
+                                    <label for="keyPrefix">Префикс ключа:</label>
+                                    <select id="keyPrefix" class="role-select">
+                                        <option value="RUST">RUST (Стандарт)</option>
+                                        <option value="CHCK">CHCK (Роль "Проверка")</option>
+                                        <option value="ADMN">ADMN (Админ)</option>
+                                        <option value="MOD">MOD (Модератор)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="keyCount">Количество ключей:</label>
+                                    <input type="number" id="keyCount" min="1" max="50" value="5">
+                                </div>
+                                
+                                <button class="btn btn-admin" onclick="generateKeys()">
+                                    Сгенерировать ключи
+                                </button>
+                            </div>
+                            
+                            <div>
+                                <h4>Действия</h4>
+                                <button class="btn" onclick="showAllKeys()" style="margin-bottom: 10px;">
+                                    Показать все ключи
+                                </button>
+                                <button class="btn" onclick="showAllUsers()" style="margin-bottom: 10px;">
+                                    Показать всех пользователей
+                                </button>
+                                <button class="btn" onclick="resetSystem()" style="margin-bottom: 10px;">
+                                    Сбросить систему
+                                </button>
+                                <button class="btn" onclick="generateSpecialKey()">
+                                    Специальный ключ для RoftikDEV
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="keysList" class="keys-list" style="display: none;"></div>
+                        <div id="usersList" class="user-list" style="display: none;"></div>
+                    </div>
+                    
+                    <div id="adminAccessDenied" class="admin-panel">
+                        <h3 style="text-align: center; margin-bottom: 20px; color: var(--error-color);">Доступ запрещен!</h3>
+                        <p style="text-align: center; color: #aaa;">
+                            Только пользователи с правами администратора имеют доступ к этой панели.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Скачать -->
+            <section id="download" class="content-section">
+                <h2 class="section-title">Скачать файлы</h2>
+                <div class="download-section">
+                    <div id="downloadMessage" class="message" style="display: none;"></div>
+                    
+                    <div id="downloadBlock" style="display: none;">
+                        <p style="margin-bottom: 30px; color: #ccc;">
+                            Ваш аккаунт активирован! Вы можете скачать файлы для проверки Rust.
+                        </p>
+                        <a href="https://mega.nz/file/YiYCjBpb#9YSsEzBjmROuy89vGRZaeiGM0OhDDNM6ypjvn4U90JE" 
+                           target="_blank" 
+                           class="btn download-btn">
+                            ⬇️ СКАЧАТЬ ФАЙЛЫ ДЛЯ ПРОВЕРКИ
+                        </a>
+                        <p style="margin-top: 20px; color: #aaa; font-size: 0.9em;">
+                            Нажмите на кнопку для перехода к скачиванию с MEGA
+                        </p>
+                    </div>
+                    
+                    <div id="noAccessBlock">
+                        <p style="color: #ff6b6b; margin-bottom: 20px;">
+                            ❌ Доступ запрещен! Для скачивания необходимо:
+                        </p>
+                        <ol style="text-align: left; max-width: 500px; margin: 0 auto 30px; color: #ccc;">
+                            <li>Зарегистрироваться и войти в систему</li>
+                            <li>Получить ключ активации от администратора</li>
+                            <li>Активировать ключ в разделе "Активация"</li>
+                        </ol>
+                        <button class="btn" onclick="showSection('activate')">
+                            Перейти к активации
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Разработчики -->
+            <section id="developers" class="content-section">
+                <h2 class="section-title">Наша команда</h2>
+                <div class="devs-list">
+                    <div class="dev-card">
+                        <div class="dev-name">RoftikDEV</div>
+                        <div class="dev-role">Главный администратор</div>
+                        <p style="margin-top: 15px; color: #ccc;">
+                            Полные права доступа, управление системой
+                        </p>
+                        <div style="margin-top: 10px; padding: 5px 10px; background: var(--admin-color); border-radius: 5px; display: inline-block;">
+                            Специальный ключ: Dimok2016
+                        </div>
+                    </div>
+                    
+                    <div class="dev-card">
+                        <div class="dev-name">ZovDEV</div>
+                        <div class="dev-role">Системный администратор</div>
+                        <p style="margin-top: 15px; color: #ccc;">
+                            Безопасность, инфраструктура, генерация ключей
+                        </p>
+                    </div>
+                    
+                    <div class="dev-card">
+                        <div class="dev-name">zxc_obezjankyaa</div>
+                        <div class="dev-role">Автор проекта</div>
+                        <p style="margin-top: 15px; color: #ccc;">
+                            Идея проекта, тестирование, документация
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024 RustMe Inspection by zxc_obezjankyaa. Все права защищены.</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Контакты: RoftikDEV | ZovDEV
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Константы ролей
+        const ROLES = {
+            GUEST: 'guest',
+            USER: 'user',
+            CHECK: 'check',
+            MODERATOR: 'moderator',
+            ADMIN: 'admin'
+        };
+
+        // Специальные ключи
+        const SPECIAL_KEYS = {
+            ROFTIK_ADMIN: 'Dimok2016'  // Специальный ключ для RoftikDEV
+        };
+
+        // Система хранения данных
+        let users = JSON.parse(localStorage.getItem('rustme_users')) || [];
+        let activationKeys = JSON.parse(localStorage.getItem('rustme_keys')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('rustme_current_user')) || null;
+
+        // Инициализация системы
+        function initSystem() {
+            // Добавляем предустановленных разработчиков
+            if (!users.find(u => u.username === 'RoftikDEV')) {
+                users.push({
+                    username: 'RoftikDEV',
+                    password: btoa('Dimok2016'), // Пароль совпадает с ключом
+                    role: ROLES.ADMIN,
+                    activated: true,
+                    key: 'ADMN-SPEC-001',
+                    registrationDate: new Date().toISOString(),
+                    specialKeyUsed: true
+                });
+            }
+
+            if (!users.find(u => u.username === 'ZovDEV')) {
+                users.push({
+                    username: 'ZovDEV',
+                    password: btoa('dev123'),
+                    role: ROLES.MODERATOR,
+                    activated: true,
+                    key: 'MOD-ZOV-001',
+                    registrationDate: new Date().toISOString()
+                });
+            }
+
+            saveData();
+            updateUI();
+            
+            // Показываем нужную секцию
+            if (currentUser) {
+                if (currentUser.activated) {
+                    showSection('download');
+                } else {
+                    showSection('activate');
+                }
+            }
+        }
+
+        // Сохранение данных
+        function saveData() {
+            localStorage.setItem('rustme_users', JSON.stringify(users));
+            localStorage.setItem('rustme_keys', JSON.stringify(activationKeys));
+            localStorage.setItem('rustme_current_user', JSON.stringify(currentUser));
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            const userPanel = document.getElementById('userPanel');
+            const loginNav = document.getElementById('loginNav');
+            const adminNav = document.getElementById('adminNav');
+            
+            if (currentUser) {
+                // Показываем панель пользователя
+                userPanel.style.display = 'flex';
+                document.getElementById('currentUsername').textContent = currentUser.username;
+                
+                // Устанавливаем роль
+                const roleElement = document.getElementById('currentUserRole');
+                roleElement.textContent = getRoleName(currentUser.role);
+                roleElement.className = 'user-role ' + getRoleClass(currentUser.role);
+                
+                // Меняем текст кнопки входа на "Выйти"
+                loginNav.textContent = 'Выйти';
+                loginNav.onclick = logout;
+                
+                // Показываем админ-панель если есть права
+                if (currentUser.role === ROLES.ADMIN || currentUser.role === ROLES.MODERATOR) {
+                    adminNav.style.display = 'block';
+                } else {
+                    adminNav.style.display = 'none';
+                }
+            } else {
+                // Скрываем панель пользователя
+                userPanel.style.display = 'none';
+                
+                // Возвращаем кнопку входа
+                loginNav.textContent = 'Войти';
+                loginNav.onclick = () => showSection('login');
+                
+                // Скрываем админ-панель
+                adminNav.style.display = 'none';
+            }
+            
+            // Обновляем панель админа
+            updateAdminPanel();
+        }
+
+        // Показать секцию
+        function showSection(sectionId) {
+            // Скрыть все секции
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Показать нужную секцию
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Обновить блок скачивания
+            if (sectionId === 'download') {
+                updateDownloadSection();
+            }
+        }
+
+        // Вход пользователя
+        function loginUser() {
+            const username = document.getElementById('loginUsernameInput').value.trim();
+            const password = document.getElementById('loginPasswordInput').value;
+            const messageDiv = document.getElementById('loginMessage');
+            
+            // Проверка специального ключа для RoftikDEV
+            if (password === SPECIAL_KEYS.ROFTIK_ADMIN) {
+                let user = users.find(u => u.username === username);
+                if (!user) {
+                    // Создаем нового пользователя с правами админа
+                    user = {
+                        username: username,
+                        password: btoa(SPECIAL_KEYS.ROFTIK_ADMIN),
+                        role: ROLES.ADMIN,
+                        activated: true,
+                        key: 'ADMN-SPEC-' + Date.now().toString().slice(-4),
+                        registrationDate: new Date().toISOString(),
+                        specialKeyUsed: true
+                    };
+                    users.push(user);
+                } else {
+                    // Обновляем существующего пользователя
+                    user.role = ROLES.ADMIN;
+                    user.activated = true;
+                    user.specialKeyUsed = true;
+                }
+                
+                currentUser = user;
+                saveData();
+                updateUI();
+                
+                showMessage(messageDiv, '✅ Вход выполнен с правами администратора!', 'success');
+                setTimeout(() => showSection('admin'), 1500);
+                return;
+            }
+            
+            // Обычный вход
+            const user = users.find(u => u.username === username);
+            
+            if (!user) {
+                showMessage(messageDiv, 'Пользователь не найден', 'error');
+                return;
+            }
+            
+            if (atob(user.password) !== password) {
+                showMessage(messageDiv, 'Неверный пароль', 'error');
+                return;
+            }
+            
+            currentUser = user;
+            saveData();
+            updateUI();
+            
+            showMessage(messageDiv, 'Вход выполнен успешно!', 'success');
+            
+            // Очистка полей
+            document.getElementById('loginUsernameInput').value = '';
+            document.getElementById('loginPasswordInput').value = '';
+            
+            // Перенаправление
+            setTimeout(() => {
+                if (user.activated) {
+                    showSection('download');
+                } else {
+                    showSection('activate');
+                }
+            }, 1500);
+        }
+
+        // Регистрация пользователя
+        function registerUser() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageDiv = document.getElementById('registerMessage');
+            
+            // Валидация
+            if (!username || !password || !confirmPassword) {
+                showMessage(messageDiv, 'Заполните все поля', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage(messageDiv, 'Пароли не совпадают', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage(messageDiv, 'Пароль должен быть не менее 6 символов', 'error');
+                return;
+            }
+            
+            if (users.find(u => u.username === username)) {
+                showMessage(messageDiv, 'Пользователь с таким именем уже существует', 'error');
+                return;
+            }
+            
+            // Регистрация
+            const newUser = {
+                username: username,
+                password: btoa(password),
+                role: ROLES.USER,
+                activated: false,
+                key: null,
+                registrationDate: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            currentUser = newUser;
+            saveData();
+            updateUI();
+            
+            showMessage(messageDiv, 'Регистрация успешна! Теперь активируйте ключ.', 'success');
+            
+            // Очистка полей
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Перенаправление
+            setTimeout(() => showSection('activate'), 1500);
+        }
+
+        // Активация ключа
+        function activateKey() {
+            const username = document.getElementById('activationUsername').value.trim();
+            const password = document.getElementById('activationPassword').value;
+            const key = document.getElementById('activationKey').value.trim().toUpperCase();
+            const messageDiv = document.getElementById('activateMessage');
+            
+            // Проверка специального ключа для RoftikDEV
+            if (key === SPECIAL_KEYS.ROFTIK_ADMIN) {
+                showMessage(messageDiv, 'Этот ключ используется только для входа администратора', 'warning');
+                return;
+            }
+            
+            // Поиск пользователя
+            const user = users.find(u => u.username === username);
+            
+            if (!user) {
+                showMessage(messageDiv, 'Пользователь не найден', 'error');
+                return;
+            }
+            
+            if (atob(user.password) !== password) {
+                showMessage(messageDiv, 'Неверный пароль', 'error');
+                return;
+            }
+            
+            // Проверка ключа
+            const keyData = activationKeys.find(k => k.key === key && !k.used);
+            
+            if (!keyData) {
+                showMessage(messageDiv, 'Неверный или использованный ключ', 'error');
+                return;
+            }
+            
+            // Определяем роль по префиксу ключа
+            let role = ROLES.USER;
+            if (key.startsWith('CHCK')) {
+                role = ROLES.CHECK;
+            } else if (key.startsWith('ADMN')) {
+                role = ROLES.ADMIN;
+            } else if (key.startsWith('MOD')) {
+                role = ROLES.MODERATOR;
+            }
+            
+            // Активация
+            user.activated = true;
+            user.role = role;
+            user.key = key;
+            keyData.used = true;
+            keyData.activatedBy = username;
+            keyData.activationDate = new Date().toISOString();
+            
+            if (currentUser && currentUser.username === username) {
+                currentUser = user;
+            }
+            
+            saveData();
+            updateUI();
+            
+            const roleName = getRoleName(role);
+            showMessage(messageDiv, `Ключ успешно активирован! Ваша роль: ${roleName}`, 'success');
+            
+            // Очистка полей
+            document.getElementById('activationUsername').value = '';
+            document.getElementById('activationPassword').value = '';
+            document.getElementById('activationKey').value = '';
+            
+            // Перенаправление
+            setTimeout(() => {
+                showSection('download');
+            }, 2000);
+        }
+
+        // Выход из системы
+        function logout() {
+            currentUser = null;
+            saveData();
+            updateUI();
+            showSection('home');
+        }
+
+        // Обновление секции скачивания
+        function updateDownloadSection() {
+            const downloadBlock = document.getElementById('downloadBlock');
+            const noAccessBlock = document.getElementById('noAccessBlock');
+            const messageDiv = document.getElementById('downloadMessage');
+            
+            if (currentUser && currentUser.activated) {
+                downloadBlock.style.display = 'block';
+                noAccessBlock.style.display = 'none';
+                showMessage(messageDiv, '✅ Ваш аккаунт активирован. Вы можете скачать файлы.', 'success');
+            } else {
+                downloadBlock.style.display = 'none';
+                noAccessBlock.style.display = 'block';
+                showMessage(messageDiv, '❌ Для скачивания требуется активированный аккаунт', 'error');
+            }
+        }
+
+        // Обновление админ-панели
+        function updateAdminPanel() {
+            const adminPanel = document.getElementById('adminPanel');
+            const accessDenied = document.getElementById('adminAccessDenied');
+            
+            if (currentUser && (currentUser.role === ROLES.ADMIN || currentUser.role === ROLES.MODERATOR)) {
+                adminPanel.style.display = 'block';
+                accessDenied.style.display = 'none';
+            } else {
+                adminPanel.style.display = 'none';
+                accessDenied.style.display = 'block';
+            }
+        }
+
+        // Генерация ключей
+        function generateKeys() {
+            if (!currentUser || (currentUser.role !== ROLES.ADMIN && currentUser.role !== ROLES.MODERATOR)) {
+                alert('Недостаточно прав');
+                return;
+            }
+            
+            const prefix = document.getElementById('keyPrefix').value;
+            const count = parseInt(document.getElementById('keyCount').value);
+            
+            const newKeys = [];
+            
+            for (let i = 0; i < count; i++) {
+                const key = `${prefix}-${generateRandomString(4)}-${generateRandomString(4)}`;
+                newKeys.push({
+                    key: key,
+                    role: getRoleByPrefix(prefix),
+                    generated: new Date().toISOString(),
+                    generatedBy: currentUser.username,
+                    used: false,
+                    activatedBy: null,
+                    activationDate: null
+                });
+            }
+            
+            activationKeys.push(...newKeys);
+            saveData();
+            
+            // Показать сгенерированные ключи
+            const keysList = document.getElementById('keysList');
+            keysList.innerHTML = '<h4>Сгенерированные ключи:</h4>';
+            newKeys.forEach(keyData => {
+                const keyItem = document.createElement('div');
+                keyItem.className = 'key-item';
+                keyItem.innerHTML = `
+                    <div>
+                        <strong>${keyData.key}</strong><br>
+                        <small>Роль: ${getRoleName(keyData.role)}</small>
+                    </div>
+                    <span style="color: #00ff88;">Не активирован</span>
+                `;
+                keysList.appendChild(keyItem);
+            });
+            
+            keysList.style.display = 'block';
+            document.getElementById('usersList').style.display = 'none';
+        }
+
+        // Генерация специального ключа для RoftikDEV
+        function generateSpecialKey() {
+            if (!currentUser || currentUser.role !== ROLES.ADMIN) {
+                alert('Только главный администратор может генерировать специальные ключи');
+                return;
+            }
+            
+            const keysList = document.getElementById('keysList');
+            keysList.innerHTML = `
+                <h4>Специальный ключ для RoftikDEV:</h4>
+                <div class="key-item">
+                    <div>
+                        <strong style="color: var(--admin-color);">${SPECIAL_KEYS.ROFTIK_ADMIN}</strong><br>
+                        <small>Используется только для входа администратора</small>
+                    </div>
+                    <span style="color: var(--warning-color);">Специальный</span>
+                </div>
+                <p style="margin-top: 10px; color: #aaa;">
+                    Этот ключ дает права администратора при использовании в поле пароля на странице входа.
+                </p>
+            `;
+            
+            keysList.style.display = 'block';
+            document.getElementById('usersList').style.display = 'none';
+        }
+
+        // Показать все ключи
+        function showAllKeys() {
+            if (!currentUser || (currentUser.role !== ROLES.ADMIN && currentUser.role !== ROLES.MODERATOR)) {
+                alert('Недостаточно прав');
+                return;
+            }
+            
+            const keysList = document.getElementById('keysList');
+            keysList.innerHTML = '<h4>Все ключи:</h4>';
+            
+            if (activationKeys.length === 0) {
+                keysList.innerHTML += '<p style="color: #aaa; text-align: center;">Нет сгенерированных ключей</p>';
+            } else {
+                activationKeys.forEach(keyData => {
+                    const keyItem = document.createElement('div');
+                    keyItem.className = 'key-item';
+                    
+                    const status = keyData.used ? 
+                        `<span class="status status-inactive">Использован ${keyData.activatedBy}</span>` :
+                        `<span class="status status-active">Доступен</span>`;
+                    
+                    keyItem.innerHTML = `
+                        <div>
+                            <strong>${keyData.key}</strong><br>
+                            <small>Роль: ${getRoleName(keyData.role)} | Создан: ${new Date(keyData.generated).toLocaleDateString()}</small>
+                        </div>
+                        ${status}
+                    `;
+                    keysList.appendChild(keyItem);
+                });
+            }
+            
+            keysList.style.display = 'block';
+            document.getElementById('usersList').style.display = 'none';
+        }
+
+        // Показать всех пользователей
+        function showAllUsers() {
+            if (!currentUser || (currentUser.role !== ROLES.ADMIN && currentUser.role !== ROLES.MODERATOR)) {
+                alert('Недостаточно прав');
+                return;
+            }
+            
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '<h4>Все пользователи:</h4>';
+            
+            if (users.length === 0) {
+                usersList.innerHTML += '<p style="color: #aaa; text-align: center;">Нет зарегистрированных пользователей</p>';
+            } else {
+                users.forEach(user => {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    
+                    const status = user.activated ? 
+                        `<span class="status status-active">Активирован</span>` :
+                        `<span class="status status-inactive">Не активирован</span>`;
+                    
+                    let roleControl = '';
+                    if (currentUser.role === ROLES.ADMIN && currentUser.username !== user.username) {
+                        roleControl = `
+                            <div class="role-control">
+                                <select class="role-select" onchange="changeUserRole('${user.username}', this.value)">
+                                    <option value="${ROLES.USER}" ${user.role === ROLES.USER ? 'selected' : ''}>Пользователь</option>
+                                    <option value="${ROLES.CHECK}" ${user.role === ROLES.CHECK ? 'selected' : ''}>Проверка</option>
+                                    <option value="${ROLES.MODERATOR}" ${user.role === ROLES.MODERATOR ? 'selected' : ''}>Модератор</option>
+                                    <option value="${ROLES.ADMIN}" ${user.role === ROLES.ADMIN ? 'selected' : ''}>Администратор</option>
+                                </select>
+                            </div>
+                        `;
+                    } else {
+                        roleControl = `<span class="user-role ${getRoleClass(user.role)}">${getRoleName(user.role)}</span>`;
+                    }
+                    
+                    userItem.innerHTML = `
+                        <div>
+                            <strong>${user.username}</strong><br>
+                            <small>Зарегистрирован: ${new Date(user.registrationDate).toLocaleDateString()}</small>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            ${status}
+                            ${roleControl}
+                        </div>
+                    `;
+                    usersList.appendChild(userItem);
+                });
+            }
+            
+            usersList.style.display = 'block';
+            document.getElementById('keysList').style.display = 'none';
+        }
+
+        // Изменение роли пользователя (только для RoftikDEV)
+        function changeUserRole(username, newRole) {
+            if (!currentUser || currentUser.role !== ROLES.ADMIN || currentUser.username !== 'RoftikDEV') {
+                alert('Только RoftikDEV может изменять роли пользователей');
+                return;
+            }
+            
+            const user = users.find(u => u.username === username);
+            if (user) {
+                user.role = newRole;
+                saveData();
+                showAllUsers(); // Обновляем список
+            }
+        }
+
+        // Сброс системы
+        function resetSystem() {
+            if (!currentUser || currentUser.role !== ROLES.ADMIN) {
+                alert('Недостаточно прав');
+                return;
+            }
+            
+            if (confirm('Вы уверены? Это удалит всех пользователей и ключи!')) {
+                users = [];
+                activationKeys = [];
+                currentUser = null;
+                
+                localStorage.clear();
+                initSystem();
+                
+                alert('Система сброшена');
+                location.reload();
+            }
+        }
+
+        // Вспомогательные функции
+        function generateRandomString(length) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function getRoleName(role) {
+            switch(role) {
+                case ROLES.ADMIN: return 'Администратор';
+                case ROLES.MODERATOR: return 'Модератор';
+                case ROLES.CHECK: return 'Проверка';
+                case ROLES.USER: return 'Пользователь';
+                default: return 'Гость';
+            }
+        }
+
+        function getRoleClass(role) {
+            switch(role) {
+                case ROLES.ADMIN: return 'role-admin';
+                case ROLES.MODERATOR: return 'role-mod';
+                case ROLES.CHECK: return 'role-check';
+                default: return 'role-user';
+            }
+        }
+
+        function getRoleByPrefix(prefix) {
+            switch(prefix) {
+                case 'ADMN': return ROLES.ADMIN;
+                case 'MOD': return ROLES.MODERATOR;
+                case 'CHCK': return ROLES.CHECK;
+                default: return ROLES.USER;
+            }
+        }
+
+        function showMessage(element, text, type) {
+            element.textContent = text;
+            element.className = `message ${type}`;
+            element.style.display = 'block';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', initSystem);
+    </script>
+</body>
+</html>
